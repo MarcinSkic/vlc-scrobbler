@@ -1,0 +1,3 @@
+GET localhost:9080/requests/status.json
+Authorization: Basic OnBhc3N3b3Jk
+Accept: application/json
