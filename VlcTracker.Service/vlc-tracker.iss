@@ -11,18 +11,17 @@ OutputBaseFilename=VlcTrackerInstaller
 Compression=lzma
 SolidCompression=yes
 WizardStyle=modern
-
-PrivilegesRequired=admin
+OutputDir=bin\Installer
 
 ; Add this flag if more than one file will be created in the future recursesubdirs
 [Files]
-Source="bin\Release\net9.0\win-x64\publish\VlcTracker.Service.exe"; DestDir="{app}"; DestName="VlcTracker.Exe" Flags: ignoreversion
+Source: "bin\Release\net9.0\win-x64\publish\VlcTracker.Service.exe"; DestDir: "{app}"; DestName: "VlcTracker.Exe"; Flags: ignoreversion
 
 [Icons]
 ; Start Menu shortcut
-Name="{group}\VlcTracker"; Filename="{app}\VlcTracker.exe"; Tasks: groupicon
+Name:"{group}\VlcTracker"; Filename:"{app}\VlcTracker.exe"; Tasks: groupicon
 ; Desktop shortcut (optional)
-Name="{commondesktop}\VlcTracker"; Filename="{app}\VlcTracker.exe"; Tasks: desktopicon
+Name:"{commondesktop}\VlcTracker"; Filename: "{app}\VlcTracker.exe"; Tasks: desktopicon
 
 [Tasks]
 Name: "desktopicon"; Description: "Create a &desktop shortcut"; GroupDescription: "Additional icons:"; Flags: unchecked
@@ -33,4 +32,4 @@ Root: HKCU; Subkey: "Software\Microsoft\Windows\CurrentVersion\Run"; ValueType: 
 
 [Run]
 ; Launch app after install (optional)
-Filename="{app}\VlcTracker.exe"; Description="Launch VlcTracker"; Flags: nowait postinstall skipifsilent
+Filename: "{app}\VlcTracker.exe"; Description: "Launch VlcTracker"; Flags: nowait postinstall skipifsilent
