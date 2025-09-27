@@ -9,8 +9,14 @@ public static class Router
         app.MapGet("/", (IStatusService statusService) => Results.Ok(statusService.GetStatus()));
 
         app.MapGet(
-            "/scrobbles/raw",
+            "/scrobbles",
             async (IApiService apiService) => Results.Ok(await apiService.GetScrobbles())
+        );
+
+        app.MapGet(
+            "/scrobbles/filenames",
+            async (IApiService apiService) =>
+                Results.Ok(await apiService.GetScrobblesByFilename())
         );
 
         return app;

@@ -5,4 +5,6 @@ namespace VlcTracker.Service.Services;
 public interface IApiService
 {
     Task<IEnumerable<ScrobbleModel>> GetScrobbles();
+
+    Task<IEnumerable<ScrobblesGrouped>> GetScrobblesByFilename();
 }
