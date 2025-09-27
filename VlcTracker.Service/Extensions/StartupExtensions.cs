@@ -5,7 +5,10 @@ namespace VlcTracker.Service.Extensions;
 
 public static class StartupExtensions
 {
-    public static IServiceCollection LoadSettings(this IServiceCollection services, out Settings settings)
+    public static IServiceCollection LoadSettings(
+        this IServiceCollection services,
+        out Settings settings
+    )
     {
         settings = new Settings();
         var settingsPath = Path.Join(Constants.ApplicationDataPath, "settings.json");
@@ -13,11 +16,13 @@ public static class StartupExtensions
         try
         {
             var settingsJson = File.ReadAllText(settingsPath);
-            settings = JsonSerializer.Deserialize<Settings>(settingsJson, Constants.JsonDefaultOptions) ?? settings;
+            settings =
+                JsonSerializer.Deserialize<Settings>(settingsJson, Constants.JsonDefaultOptions)
+                ?? settings;
         }
         catch (FileNotFoundException e)
         {
-            var settingsJson = JsonSerializer.Serialize(settings,Constants.JsonDefaultOptions);
+            var settingsJson = JsonSerializer.Serialize(settings, Constants.JsonDefaultOptions);
             File.WriteAllText(settingsPath, settingsJson);
         }
         catch (JsonException e)
@@ -26,7 +31,7 @@ public static class StartupExtensions
         }
 
         services.AddSingleton(settings);
-        
+
         return services;
     }
 }

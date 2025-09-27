@@ -11,7 +11,7 @@ public class TrackingContext(DbContextOptions<TrackingContext> options) : DbCont
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         new ScrobbleEntityConfiguration().Configure(modelBuilder.Entity<Scrobble>());
-        
+
         base.OnModelCreating(modelBuilder);
     }
 }

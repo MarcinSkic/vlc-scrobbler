@@ -14,13 +14,15 @@ namespace VlcTracker.Service.Migrations
                 name: "IX_Scrobbles_FileName",
                 schema: "tracker",
                 table: "Scrobbles",
-                column: "FileName");
+                column: "FileName"
+            );
 
             migrationBuilder.CreateIndex(
                 name: "IX_Scrobbles_Title",
                 schema: "tracker",
                 table: "Scrobbles",
-                column: "Title");
+                column: "Title"
+            );
         }
 
         /// <inheritdoc />
@@ -29,12 +31,14 @@ namespace VlcTracker.Service.Migrations
             migrationBuilder.DropIndex(
                 name: "IX_Scrobbles_FileName",
                 schema: "tracker",
-                table: "Scrobbles");
+                table: "Scrobbles"
+            );
 
             migrationBuilder.DropIndex(
                 name: "IX_Scrobbles_Title",
                 schema: "tracker",
-                table: "Scrobbles");
+                table: "Scrobbles"
+            );
         }
     }
 }

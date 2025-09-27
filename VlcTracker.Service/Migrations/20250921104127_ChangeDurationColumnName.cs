@@ -14,7 +14,8 @@ namespace VlcTracker.Service.Migrations
                 name: "DurationMs",
                 schema: "tracker",
                 table: "Scrobbles",
-                newName: "Duration");
+                newName: "Duration"
+            );
         }
 
         /// <inheritdoc />
@@ -24,7 +25,8 @@ namespace VlcTracker.Service.Migrations
                 name: "Duration",
                 schema: "tracker",
                 table: "Scrobbles",
-                newName: "DurationMs");
+                newName: "DurationMs"
+            );
         }
     }
 }

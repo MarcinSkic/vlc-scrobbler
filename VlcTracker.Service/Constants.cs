@@ -13,8 +13,6 @@ public static class Constants
             TechnicalName
         );
 
-    public static JsonSerializerOptions JsonDefaultOptions { get; } = new()
-    {
-        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-    };
+    public static JsonSerializerOptions JsonDefaultOptions { get; } =
+        new() { PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
 }

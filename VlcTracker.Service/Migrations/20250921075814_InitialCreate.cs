@@ -11,8 +11,7 @@ namespace VlcTracker.Service.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.EnsureSchema(
-                name: "tracker");
+            migrationBuilder.EnsureSchema(name: "tracker");
 
             migrationBuilder.CreateTable(
                 name: "Scrobbles",
@@ -24,20 +23,19 @@ namespace VlcTracker.Service.Migrations
                     Title = table.Column<string>(type: "TEXT", maxLength: 500, nullable: true),
                     InRepeat = table.Column<bool>(type: "INTEGER", nullable: false),
                     DurationMs = table.Column<int>(type: "INTEGER", nullable: false),
-                    Date = table.Column<DateTime>(type: "TEXT", nullable: false)
+                    Date = table.Column<DateTime>(type: "TEXT", nullable: false),
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Scrobbles", x => x.Id);
-                });
+                }
+            );
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropTable(
-                name: "Scrobbles",
-                schema: "tracker");
+            migrationBuilder.DropTable(name: "Scrobbles", schema: "tracker");
         }
     }
 }

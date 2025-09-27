@@ -2,30 +2,41 @@ using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Text.Json;
 using VlcTracker.Service.Models;
+using VlcTracker.Service.Models.Api;
 using VlcTracker.Service.Models.Vlc;
 using VlcTracker.Service.Persistence;
 using VlcTracker.Service.Persistence.Entities;
 
 namespace VlcTracker.Service.Services;
 
-public class ScrobblerService(Settings settings, ILogger<ScrobblerService> logger, IServiceScopeFactory scopeFactory) : BackgroundService
+public class ScrobblerService(
+    Settings settings,
+    ILogger<ScrobblerService> logger,
+    IStatusService statusService,
+    IServiceScopeFactory scopeFactory
+) : BackgroundService
 {
     private HttpClient GetVlcClient()
     {
         var client = new HttpClient();
-        client.BaseAddress = new Uri("http://localhost:9080/requests/status.json");
-        client.DefaultRequestHeaders.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/json"));
-        
+        client.BaseAddress = new Uri($"http://localhost:{settings.VlcPort}/requests/status.json");
+        client.DefaultRequestHeaders.Accept.Add(
+            MediaTypeWithQualityHeaderValue.Parse("application/json")
+        );
+
         var authentication = System.Text.Encoding.UTF8.GetBytes($":{settings.VlcPassword}");
-        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic",Convert.ToBase64String(authentication));
-        
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(
+            "Basic",
+            Convert.ToBase64String(authentication)
+        );
+
         return client;
     }
 
     private const double PercentageToScrobble = 0.5;
     private const int ServiceFrequency = 1;
     private const int TotalDurationQueueCapacity = 7;
-    
+
     private Scrobble? _currentScrobble;
     private double _currentDuration;
 
@@ -47,32 +58,45 @@ public class ScrobblerService(Settings settings, ILogger<ScrobblerService> logge
     private double _lastPosition;
     private bool _currentScrobbleSaved;
     private readonly Queue<double> _totalDurationQueue = new();
-    
+
     protected override async Task ExecuteAsync(CancellationToken cancellationToken)
     {
         var vlcClient = GetVlcClient();
-        
+
         while (!cancellationToken.IsCancellationRequested)
         {
+            await Task.Delay(TimeSpan.FromSeconds(ServiceFrequency), cancellationToken);
+            
             try
             {
                 var response = await vlcClient.GetAsync("", cancellationToken);
-                var result = (await response.Content.ReadFromJsonAsync<VlcStatus>(cancellationToken))!;
 
-                await AnalyzeVlcStatus(result,cancellationToken);
+                if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
+                {
+                    SetStatus("Can't connect to VLC: incorrect password");
+                    continue;
+                }
+                
+                var result = (
+                    await response.Content.ReadFromJsonAsync<VlcStatus>(cancellationToken)
+                )!;
+
+                await AnalyzeVlcStatus(result, cancellationToken);
             }
             catch (HttpRequestException e)
             {
-                logger.LogInformation("VLC is disabled");
                 ResetCurrentScrobble();
+                
+                SetStatus("VLC is disabled");
             }
             catch (JsonException e)
             {
-                logger.LogWarning("Could not deserialize VLC status as video");
                 ResetCurrentScrobble();
+                
+                const string msg = "Could not deserialize VLC status as video";
+                SetStatus(msg, logInfo: false);
+                logger.LogWarning(msg);
             }
-            
-            await Task.Delay(TimeSpan.FromSeconds(ServiceFrequency), cancellationToken);
         }
     }
 
@@ -80,22 +104,23 @@ public class ScrobblerService(Settings settings, ILogger<ScrobblerService> logge
     {
         if (_currentScrobble is null)
         {
-            logger.LogInformation("New Scrobble: opened VLC");
             SetNewScrobble(status);
+            SetStatus("New Scrobble: opened VLC");
             return;
         }
 
         if (_currentScrobble.FileName != status.Information.Category.Meta.FileName)
         {
-            logger.LogInformation("New Scrobble: changed file");
             SetNewScrobble(status);
+            SetStatus("New Scrobble: changed file");
             return;
         }
-        
+
         TryCalculateTotalDuration(status);
 
         if (TotalDuration == 0 || status.State == "paused")
         {
+            SetStatus("VLC is paused");
             return;
         }
 
@@ -103,31 +128,42 @@ public class ScrobblerService(Settings settings, ILogger<ScrobblerService> logge
         {
             if (_currentScrobbleSaved)
             {
-                logger.LogInformation("New Scrobble: moved back scrobbled file");
                 SetNewScrobble(status);
+                
+                SetStatus("New Scrobble: moved back scrobbled file");
                 return;
             }
-            
-            _currentDuration = Math.Max(_currentDuration - (_lastPosition- status.Position)*TotalDuration - ServiceFrequency,0);
-        }
 
+            _currentDuration = Math.Max(
+                _currentDuration
+                    - (_lastPosition - status.Position) * TotalDuration
+                    - ServiceFrequency,
+                0
+            );
+        }
 
         _currentDuration += ServiceFrequency;
         _lastPosition = status.Position;
-        logger.LogInformation("Scrobble progress: {Duration}s/{MinimumDurationToScrobble}s", _currentDuration,PercentageToScrobble*TotalDuration);
-        if (_currentDuration / TotalDuration > PercentageToScrobble && !_currentScrobbleSaved && _totalDurationQueue.Count == TotalDurationQueueCapacity)
+        SetStatus($"Scrobble progress: {_currentDuration}s/{PercentageToScrobble * TotalDuration}s");
+        if (
+            _currentDuration / TotalDuration > PercentageToScrobble
+            && !_currentScrobbleSaved
+            && _totalDurationQueue.Count == TotalDurationQueueCapacity
+        )
         {
             using var scope = scopeFactory.CreateScope();
             var dbContext = scope.ServiceProvider.GetRequiredService<TrackingContext>();
 
             _currentScrobble.Duration = (int)TotalDuration;
-            await dbContext.Scrobbles.AddAsync(_currentScrobble,cancellationToken);
+            await dbContext.Scrobbles.AddAsync(_currentScrobble, cancellationToken);
             await dbContext.SaveChangesAsync(cancellationToken);
             _currentScrobbleSaved = true;
-            
-            logger.LogInformation("=======Scrobbled: {CurrentScrobbleFileName}============", _currentScrobble.FileName);
+
+            logger.LogInformation(
+                "=======Scrobbled: {CurrentScrobbleFileName}============",
+                _currentScrobble.FileName
+            );
         }
-        
     }
 
     private void TryCalculateTotalDuration(VlcStatus status)
@@ -143,7 +179,7 @@ public class ScrobblerService(Settings settings, ILogger<ScrobblerService> logge
         {
             return;
         }
-        
+
         if (_totalDurationQueue.Count >= TotalDurationQueueCapacity)
         {
             _totalDurationQueue.Dequeue();
@@ -153,21 +189,25 @@ public class ScrobblerService(Settings settings, ILogger<ScrobblerService> logge
 
     private void SetNewScrobble(VlcStatus status)
     {
-        logger.LogInformation("Start scrobbling: {FileName}", status.Information.Category.Meta.FileName);
+        logger.LogInformation(
+            "Start scrobbling: {FileName}",
+            status.Information.Category.Meta.FileName
+        );
         var meta = status.Information.Category.Meta;
 
         _totalDurationQueue.Clear();
         _currentDuration = 0;
         _lastPosition = status.Position;
         _currentScrobbleSaved = false;
-        
+
         _currentScrobble = new Scrobble
         {
             Id = Guid.NewGuid(),
             FileName = meta.FileName,
             Title = meta.Title,
             InRepeat = status.Repeat,
-            Duration = (int)TotalDuration
+            Duration = (int)TotalDuration,
+            Date = settings.SaveDate ? DateTime.Now : null,
         };
     }
 
@@ -177,12 +217,21 @@ public class ScrobblerService(Settings settings, ILogger<ScrobblerService> logge
         {
             return;
         }
-        
+
         logger.LogInformation("Scrobbling reset");
         _currentScrobble = null;
         _totalDurationQueue.Clear();
         _currentDuration = 0;
         _lastPosition = 0;
         _currentScrobbleSaved = false;
+    }
+
+    private void SetStatus(string msg, bool logInfo = true)
+    {
+        statusService.SetStatus(new Status(msg,ScrobbleModel.FromScrobble(_currentScrobble), _currentDuration,TotalDuration));
+        if (logInfo)
+        {
+            logger.LogInformation("{Message}",msg);
+        }
     }
 }
