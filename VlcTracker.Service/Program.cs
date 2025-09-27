@@ -22,6 +22,8 @@ builder
     .AddSingleton<IStatusService, StatusService>()
     .AddHostedService<ScrobblerService>();
 
+builder.ConfigureLogging(settings);
+
 builder.WebHost.UseUrls($"http://localhost:{settings.ServerPort}");
 
 var app = builder.Build();

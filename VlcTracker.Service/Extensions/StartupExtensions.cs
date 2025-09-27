@@ -34,4 +34,16 @@ public static class StartupExtensions
 
         return services;
     }
+
+    public static IHostApplicationBuilder ConfigureLogging(
+        this IHostApplicationBuilder builder,
+        Settings settings
+    )
+    {
+        builder.Logging.ClearProviders();
+        builder.Logging.AddConsole();
+        builder.Logging.SetMinimumLevel(settings.LogLevel);
+
+        return builder;
+    }
 }

@@ -66,7 +66,7 @@ public class ScrobblerService(
         while (!cancellationToken.IsCancellationRequested)
         {
             await Task.Delay(TimeSpan.FromSeconds(ServiceFrequency), cancellationToken);
-            
+
             try
             {
                 var response = await vlcClient.GetAsync("", cancellationToken);
@@ -76,7 +76,7 @@ public class ScrobblerService(
                     SetStatus("Can't connect to VLC: incorrect password");
                     continue;
                 }
-                
+
                 var result = (
                     await response.Content.ReadFromJsonAsync<VlcStatus>(cancellationToken)
                 )!;
@@ -86,13 +86,13 @@ public class ScrobblerService(
             catch (HttpRequestException e)
             {
                 ResetCurrentScrobble();
-                
+
                 SetStatus("VLC is disabled");
             }
             catch (JsonException e)
             {
                 ResetCurrentScrobble();
-                
+
                 const string msg = "Could not deserialize VLC status as video";
                 SetStatus(msg, logInfo: false);
                 logger.LogWarning(msg);
@@ -129,7 +129,7 @@ public class ScrobblerService(
             if (_currentScrobbleSaved)
             {
                 SetNewScrobble(status);
-                
+
                 SetStatus("New Scrobble: moved back scrobbled file");
                 return;
             }
@@ -144,7 +144,9 @@ public class ScrobblerService(
 
         _currentDuration += ServiceFrequency;
         _lastPosition = status.Position;
-        SetStatus($"Scrobble progress: {_currentDuration}s/{PercentageToScrobble * TotalDuration}s");
+        SetStatus(
+            $"Scrobble progress: {_currentDuration}s/{PercentageToScrobble * TotalDuration}s"
+        );
         if (
             _currentDuration / TotalDuration > PercentageToScrobble
             && !_currentScrobbleSaved
@@ -228,10 +230,17 @@ public class ScrobblerService(
 
     private void SetStatus(string msg, bool logInfo = true)
     {
-        statusService.SetStatus(new Status(msg,ScrobbleModel.FromScrobble(_currentScrobble), _currentDuration,TotalDuration));
+        statusService.SetStatus(
+            new Status(
+                msg,
+                ScrobbleModel.FromScrobble(_currentScrobble),
+                _currentDuration,
+                TotalDuration
+            )
+        );
         if (logInfo)
         {
-            logger.LogInformation("{Message}",msg);
+            logger.LogInformation("{Message}", msg);
         }
     }
 }
