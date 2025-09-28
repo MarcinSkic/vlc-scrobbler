@@ -17,7 +17,8 @@ namespace VlcTracker.Service.Migrations
                 type: "REAL",
                 nullable: true,
                 oldClrType: typeof(int),
-                oldType: "INTEGER");
+                oldType: "INTEGER"
+            );
         }
 
         /// <inheritdoc />
@@ -32,7 +33,8 @@ namespace VlcTracker.Service.Migrations
                 defaultValue: 0,
                 oldClrType: typeof(double),
                 oldType: "REAL",
-                oldNullable: true);
+                oldNullable: true
+            );
         }
     }
 }

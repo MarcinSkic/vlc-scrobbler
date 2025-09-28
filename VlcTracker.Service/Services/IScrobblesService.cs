@@ -1,3 +1,4 @@
+using CsvHelper;
 using VlcTracker.Service.Models.Api;
 using VlcTracker.Service.Persistence.Entities;
 
@@ -11,5 +12,7 @@ public interface IScrobblesService
 
     Task AddScrobbleAsync(Scrobble scrobble, CancellationToken cancellationToken);
 
-    Task UpdateScrobbleAsync(Scrobble scrobble,CancellationToken cancellationToken);
+    Task UpdateScrobbleAsync(Scrobble scrobble, CancellationToken cancellationToken);
+
+    Task<int> ImportScrobblesFromCsv(CsvReader csvStream, CancellationToken cancellationToken);
 }

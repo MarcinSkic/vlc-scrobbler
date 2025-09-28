@@ -190,7 +190,7 @@ public class ScrobblerBackgroundService(
     private async Task SetNewScrobble(VlcStatus status, CancellationToken cancellationToken)
     {
         await TrySaveCurrentScrobbleTime(cancellationToken);
-        
+
         logger.LogInformation(
             "Start scrobbling: {FileName}",
             status.Information.Category.Meta.FileName
@@ -216,7 +216,7 @@ public class ScrobblerBackgroundService(
     private async Task ResetCurrentScrobble(CancellationToken cancellationToken)
     {
         await TrySaveCurrentScrobbleTime(cancellationToken);
-        
+
         if (_currentScrobble is null)
         {
             return;
@@ -236,13 +236,13 @@ public class ScrobblerBackgroundService(
         {
             return;
         }
-        
+
         using var scope = scopeFactory.CreateScope();
         var scrobblesService = scope.ServiceProvider.GetRequiredService<IScrobblesService>();
 
         // Math.Min to safeguard against VLC freezing
-        _currentScrobble.ScrobbleDuration =Math.Min(_currentDuration,TotalDuration);
-        await scrobblesService.UpdateScrobbleAsync(_currentScrobble,cancellationToken);
+        _currentScrobble.ScrobbleDuration = Math.Min(_currentDuration, TotalDuration);
+        await scrobblesService.UpdateScrobbleAsync(_currentScrobble, cancellationToken);
     }
 
     private void SetStatus(string msg, bool logInfo = true)

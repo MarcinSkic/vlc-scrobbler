@@ -8,7 +8,8 @@ public record ScrobbleModel(
     string FileName,
     string? Title,
     bool InRepeat,
-    int? Duration,
+    int? VideoDuration,
+    int? ScrobbleDuration,
     DateTime? Date
 )
 {
@@ -22,6 +23,7 @@ public record ScrobbleModel(
                 scrobble.Title,
                 scrobble.InRepeat,
                 (int?)scrobble.VideoDuration,
+                (int?)scrobble.ScrobbleDuration,
                 scrobble.Date
             )
             : null;

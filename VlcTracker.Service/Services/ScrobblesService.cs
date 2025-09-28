@@ -1,3 +1,4 @@
+using CsvHelper;
 using Microsoft.EntityFrameworkCore;
 using VlcTracker.Service.Models.Api;
 using VlcTracker.Service.Persistence;
@@ -19,11 +20,18 @@ public class ScrobblesService(TrackingContext dbContext) : IScrobblesService
     {
         return await dbContext
             .Scrobbles.GroupBy(scrobble => scrobble.FileName)
-            .Select(grouping => new ScrobblesGrouped{
+            .Select(grouping => new ScrobblesGrouped
+            {
                 FileName = grouping.Key,
-                Duration = grouping.Where(scrobble => scrobble.VideoDuration != 0).Average(scrobble => scrobble.VideoDuration),
+                Duration = grouping
+                    .Where(scrobble => scrobble.VideoDuration != 0)
+                    .Average(scrobble => scrobble.VideoDuration),
+                TotalScrobbleDurationIncludingImported = grouping.Sum(scrobble =>
+                    scrobble.ScrobbleDuration ?? scrobble.VideoDuration ?? 0
+                ),
+                TotalScrobbleDuration = grouping.Sum(scrobble => scrobble.ScrobbleDuration ?? 0),
                 RepeatCount = grouping.Count(s => s.InRepeat),
-                Count = grouping.Count()
+                Count = grouping.Count(),
             })
             .OrderByDescending(scrobble => scrobble.Count)
             .ToListAsync();
@@ -39,5 +47,29 @@ public class ScrobblesService(TrackingContext dbContext) : IScrobblesService
     {
         dbContext.Scrobbles.Update(scrobble);
         await dbContext.SaveChangesAsync(cancellationToken);
+    }
+
+    public async Task<int> ImportScrobblesFromCsv(
+        CsvReader csvStream,
+        CancellationToken cancellationToken
+    )
+    {
+        var records = csvStream
+            .GetRecords<ImportedScrobblesDto>()
+            .SelectMany(importedScrobbles => Enumerable.Range(0,importedScrobbles.Count).Select(_ => new Scrobble
+            {
+                Id = Guid.NewGuid(),
+                FileName = importedScrobbles.FileName,
+                Title = importedScrobbles.Title,
+                InRepeat = false,
+                VideoDuration = importedScrobbles.VideoDuration,
+                ScrobbleDuration = null,
+                Date = importedScrobbles.Date
+            }))
+            .ToList();
+        
+        dbContext.Scrobbles.AddRange(records);
+        await dbContext.SaveChangesAsync(cancellationToken);
+        return records.Count;
     }
 }

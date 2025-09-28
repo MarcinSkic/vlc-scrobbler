@@ -14,14 +14,16 @@ namespace VlcTracker.Service.Migrations
                 name: "Duration",
                 schema: "tracker",
                 table: "Scrobbles",
-                newName: "VideoDuration");
+                newName: "VideoDuration"
+            );
 
             migrationBuilder.AddColumn<double>(
                 name: "ScrobbleDuration",
                 schema: "tracker",
                 table: "Scrobbles",
                 type: "REAL",
-                nullable: true);
+                nullable: true
+            );
         }
 
         /// <inheritdoc />
@@ -30,13 +32,15 @@ namespace VlcTracker.Service.Migrations
             migrationBuilder.DropColumn(
                 name: "ScrobbleDuration",
                 schema: "tracker",
-                table: "Scrobbles");
+                table: "Scrobbles"
+            );
 
             migrationBuilder.RenameColumn(
                 name: "VideoDuration",
                 schema: "tracker",
                 table: "Scrobbles",
-                newName: "Duration");
+                newName: "Duration"
+            );
         }
     }
 }

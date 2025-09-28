@@ -1,3 +1,6 @@
+using System.Globalization;
+using CsvHelper;
+using CsvHelper.Configuration;
 using VlcTracker.Service.Services;
 
 namespace VlcTracker.Service.Web;
@@ -10,7 +13,8 @@ public static class Router
 
         app.MapGet(
             "/scrobbles",
-            async (IScrobblesService scrobblesService) => Results.Ok(await scrobblesService.GetScrobbles())
+            async (IScrobblesService scrobblesService) =>
+                Results.Ok(await scrobblesService.GetScrobbles())
         );
 
         app.MapGet(
@@ -18,6 +22,33 @@ public static class Router
             async (IScrobblesService scrobblesService) =>
                 Results.Ok(await scrobblesService.GetScrobblesByFilename())
         );
+
+        app.MapPost(
+            "/scrobbles/import/csv",
+            async (
+                IFormFile file,
+                IScrobblesService scrobblesService,
+                CancellationToken cancellationToken
+            ) =>
+            {
+                if (file.Length == 0)
+                    return Results.BadRequest("No file uploaded.");
+
+                await using var stream = file.OpenReadStream();
+                using var reader = new StreamReader(stream);
+                using var csv = new CsvReader(reader, new CsvConfiguration(CultureInfo.InvariantCulture)
+                {
+                    HeaderValidated = null,
+                    MissingFieldFound = null
+                });
+
+                var importedCount = await scrobblesService.ImportScrobblesFromCsv(
+                    csv,
+                    cancellationToken
+                );
+                return Results.Ok(new { Count = importedCount });
+            }
+        ).DisableAntiforgery();
 
         return app;
     }

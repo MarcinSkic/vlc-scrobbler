@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using VlcTracker.Service.Persistence;
 
@@ -10,9 +11,11 @@ using VlcTracker.Service.Persistence;
 namespace VlcTracker.Service.Migrations
 {
     [DbContext(typeof(TrackingContext))]
-    partial class TrackingContextModelSnapshot : ModelSnapshot
+    [Migration("20250928194629_AddCreatedAtColumn")]
+    partial class AddCreatedAtColumn
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "9.0.9");
@@ -26,7 +29,7 @@ namespace VlcTracker.Service.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("TEXT");
 
-                    b.Property<DateTime?>("Date")
+                    b.Property<DateTime>("Date")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("FileName")
