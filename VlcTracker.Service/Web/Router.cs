@@ -10,13 +10,13 @@ public static class Router
 
         app.MapGet(
             "/scrobbles",
-            async (IApiService apiService) => Results.Ok(await apiService.GetScrobbles())
+            async (IScrobblesService scrobblesService) => Results.Ok(await scrobblesService.GetScrobbles())
         );
 
         app.MapGet(
             "/scrobbles/filenames",
-            async (IApiService apiService) =>
-                Results.Ok(await apiService.GetScrobblesByFilename())
+            async (IScrobblesService scrobblesService) =>
+                Results.Ok(await scrobblesService.GetScrobblesByFilename())
         );
 
         return app;

@@ -1,10 +1,11 @@
 using Microsoft.EntityFrameworkCore;
 using VlcTracker.Service.Models.Api;
 using VlcTracker.Service.Persistence;
+using VlcTracker.Service.Persistence.Entities;
 
 namespace VlcTracker.Service.Services;
 
-public class ApiService(TrackingContext dbContext) : IApiService
+public class ScrobblesService(TrackingContext dbContext) : IScrobblesService
 {
     public async Task<IEnumerable<ScrobbleModel>> GetScrobbles()
     {
@@ -26,5 +27,11 @@ public class ApiService(TrackingContext dbContext) : IApiService
             })
             .OrderByDescending(scrobble => scrobble.Count)
             .ToListAsync();
+    }
+
+    public async Task SaveScrobble(Scrobble scrobble, CancellationToken cancellationToken)
+    {
+        await dbContext.Scrobbles.AddAsync(scrobble, cancellationToken);
+        await dbContext.SaveChangesAsync(cancellationToken);
     }
 }

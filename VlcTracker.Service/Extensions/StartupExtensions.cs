@@ -7,7 +7,7 @@ public static class StartupExtensions
 {
     public static IServiceCollection LoadSettings(
         this IServiceCollection services,
-        out Settings settings
+        out ISettings settings
     )
     {
         settings = new Settings();
@@ -37,7 +37,7 @@ public static class StartupExtensions
 
     public static IHostApplicationBuilder ConfigureLogging(
         this IHostApplicationBuilder builder,
-        Settings settings
+        ISettings settings
     )
     {
         builder.Logging.ClearProviders();

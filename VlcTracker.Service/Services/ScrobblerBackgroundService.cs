@@ -9,9 +9,9 @@ using VlcTracker.Service.Persistence.Entities;
 
 namespace VlcTracker.Service.Services;
 
-public class ScrobblerService(
-    Settings settings,
-    ILogger<ScrobblerService> logger,
+public class ScrobblerBackgroundService(
+    ISettings settings,
+    ILogger<ScrobblerBackgroundService> logger,
     IStatusService statusService,
     IServiceScopeFactory scopeFactory
 ) : BackgroundService
@@ -33,7 +33,6 @@ public class ScrobblerService(
         return client;
     }
 
-    private const double PercentageToScrobble = 0.5;
     private const int ServiceFrequency = 1;
     private const int TotalDurationQueueCapacity = 7;
 
@@ -145,20 +144,19 @@ public class ScrobblerService(
         _currentDuration += ServiceFrequency;
         _lastPosition = status.Position;
         SetStatus(
-            $"Scrobble progress: {_currentDuration}s/{PercentageToScrobble * TotalDuration}s"
+            $"Scrobble progress: {_currentDuration}s/{settings.PercentageRequiredToScrobble * TotalDuration}s"
         );
         if (
-            _currentDuration / TotalDuration > PercentageToScrobble
+            _currentDuration / TotalDuration > settings.PercentageRequiredToScrobble
             && !_currentScrobbleSaved
             && _totalDurationQueue.Count == TotalDurationQueueCapacity
         )
         {
             using var scope = scopeFactory.CreateScope();
-            var dbContext = scope.ServiceProvider.GetRequiredService<TrackingContext>();
+            var scrobblesService = scope.ServiceProvider.GetRequiredService<IScrobblesService>();
 
             _currentScrobble.Duration = (int)TotalDuration;
-            await dbContext.Scrobbles.AddAsync(_currentScrobble, cancellationToken);
-            await dbContext.SaveChangesAsync(cancellationToken);
+            await scrobblesService.SaveScrobble(_currentScrobble, cancellationToken);
             _currentScrobbleSaved = true;
 
             logger.LogInformation(

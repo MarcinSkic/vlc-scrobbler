@@ -10,7 +10,7 @@ public class Scrobble
     /// <summary>
     /// In seconds
     /// </summary>
-    public int Duration { get; set; }
+    public double? Duration { get; set; }
 
     public required DateTime? Date { get; init; }
 }

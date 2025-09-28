@@ -18,9 +18,9 @@ builder
         var dbPath = settings.DbPath ?? Path.Join(Constants.ApplicationDataPath, "tracker.db");
         options.UseSqlite($"Data Source={dbPath}");
     })
-    .AddScoped<IApiService, ApiService>()
+    .AddScoped<IScrobblesService, ScrobblesService>()
     .AddSingleton<IStatusService, StatusService>()
-    .AddHostedService<ScrobblerService>();
+    .AddHostedService<ScrobblerBackgroundService>();
 
 builder.ConfigureLogging(settings);
 
