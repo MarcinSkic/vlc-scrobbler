@@ -1,17 +1,35 @@
 <Project Sdk="Microsoft.NET.Sdk.Web">
-  <PropertyGroup>
-    <TargetFramework>net9.0</TargetFramework>
-    <Nullable>enable</Nullable>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <UserSecretsId>dotnet-VlcTracker.Service-380592da-60c8-43a1-b6ed-c155c3979e38</UserSecretsId>
-    <ApplicationIcon>Assets/logo.ico</ApplicationIcon>
-  </PropertyGroup>
-  <ItemGroup>
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.9">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="9.0.9" />
-    <PackageReference Include="Microsoft.Extensions.Hosting" Version="9.0.9" />
-  </ItemGroup>
+    <PropertyGroup>
+        <ProductName>VlcTracker</ProductName>
+        <TargetFramework>net9.0</TargetFramework>
+        <Nullable>enable</Nullable>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Version>1.0.0</Version>
+        <UserSecretsId>dotnet-VlcTracker.Service-380592da-60c8-43a1-b6ed-c155c3979e38</UserSecretsId>
+        <ApplicationIcon>Assets/logo.ico</ApplicationIcon>
+    </PropertyGroup>
+    <ItemGroup>
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.9">
+            <PrivateAssets>all</PrivateAssets>
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="9.0.9"/>
+        <PackageReference Include="Microsoft.Extensions.Hosting" Version="9.0.9"/>
+    </ItemGroup>
+
+    <Target Name="GenerateInstallerVars" AfterTargets="Build">
+        <ItemGroup>
+            <InstallerVarsFile Include="$(MSBuildProjectDirectory)\installer-vars.iss"/>
+        </ItemGroup>
+
+        <WriteLinesToFile
+                File="@(InstallerVarsFile)"
+                Lines="#define AppName &quot;$(ProductName)&quot;"
+                Overwrite="true"/>
+
+        <WriteLinesToFile
+                File="@(InstallerVarsFile)"
+                Lines="#define AppVersion &quot;$(Version)&quot;"
+                Overwrite="false"/>
+    </Target>
 </Project>

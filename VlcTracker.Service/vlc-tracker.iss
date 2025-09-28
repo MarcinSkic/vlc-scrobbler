@@ -1,13 +1,15 @@
+#include "installer-vars.iss"
+
 [Setup]
-AppName=VlcTracker
-AppVersion=1.0.0
+AppName={#AppName}
+AppVersion={#AppVersion}
 AppPublisher=Marcin Skic
 AppPublisherURL=https://skic.me
-DefaultDirName={autopf}\VlcTracker
-DefaultGroupName=VlcTracker
+DefaultDirName={autopf}\{#AppName}
+DefaultGroupName={#AppName}
 SetupIconFile=Assets\logo.ico
-UninstallDisplayIcon={app}\VlcTracker.exe
-OutputBaseFilename=VlcTrackerInstaller
+UninstallDisplayIcon={app}\{#AppName}.exe
+OutputBaseFilename={#AppName}Installer
 Compression=lzma
 SolidCompression=yes
 WizardStyle=modern
