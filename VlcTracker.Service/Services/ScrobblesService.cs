@@ -21,7 +21,7 @@ public class ScrobblesService(TrackingContext dbContext) : IScrobblesService
             .Scrobbles.GroupBy(scrobble => scrobble.FileName)
             .Select(grouping => new ScrobblesGrouped{
                 FileName = grouping.Key,
-                Duration = grouping.Where(scrobble => scrobble.Duration != 0).Average(scrobble => scrobble.Duration),
+                Duration = grouping.Where(scrobble => scrobble.VideoDuration != 0).Average(scrobble => scrobble.VideoDuration),
                 RepeatCount = grouping.Count(s => s.InRepeat),
                 Count = grouping.Count()
             })
@@ -29,9 +29,15 @@ public class ScrobblesService(TrackingContext dbContext) : IScrobblesService
             .ToListAsync();
     }
 
-    public async Task SaveScrobble(Scrobble scrobble, CancellationToken cancellationToken)
+    public async Task AddScrobbleAsync(Scrobble scrobble, CancellationToken cancellationToken)
     {
         await dbContext.Scrobbles.AddAsync(scrobble, cancellationToken);
+        await dbContext.SaveChangesAsync(cancellationToken);
+    }
+
+    public async Task UpdateScrobbleAsync(Scrobble scrobble, CancellationToken cancellationToken)
+    {
+        dbContext.Scrobbles.Update(scrobble);
         await dbContext.SaveChangesAsync(cancellationToken);
     }
 }

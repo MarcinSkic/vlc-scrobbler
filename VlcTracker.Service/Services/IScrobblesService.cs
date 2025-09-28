@@ -9,5 +9,7 @@ public interface IScrobblesService
 
     Task<IEnumerable<ScrobblesGrouped>> GetScrobblesByFilename();
 
-    Task SaveScrobble(Scrobble scrobble, CancellationToken cancellationToken);
+    Task AddScrobbleAsync(Scrobble scrobble, CancellationToken cancellationToken);
+
+    Task UpdateScrobbleAsync(Scrobble scrobble,CancellationToken cancellationToken);
 }

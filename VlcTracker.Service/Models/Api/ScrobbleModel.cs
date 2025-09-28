@@ -21,7 +21,7 @@ public record ScrobbleModel(
                 scrobble.FileName,
                 scrobble.Title,
                 scrobble.InRepeat,
-                (int?)scrobble.Duration,
+                (int?)scrobble.VideoDuration,
                 scrobble.Date
             )
             : null;

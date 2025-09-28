@@ -84,13 +84,13 @@ public class ScrobblerBackgroundService(
             }
             catch (HttpRequestException e)
             {
-                ResetCurrentScrobble();
+                await ResetCurrentScrobble(cancellationToken);
 
                 SetStatus("VLC is disabled");
             }
             catch (JsonException e)
             {
-                ResetCurrentScrobble();
+                await ResetCurrentScrobble(cancellationToken);
 
                 const string msg = "Could not deserialize VLC status as video";
                 SetStatus(msg, logInfo: false);
@@ -103,14 +103,14 @@ public class ScrobblerBackgroundService(
     {
         if (_currentScrobble is null)
         {
-            SetNewScrobble(status);
+            await SetNewScrobble(status, cancellationToken);
             SetStatus("New Scrobble: opened VLC");
             return;
         }
 
         if (_currentScrobble.FileName != status.Information.Category.Meta.FileName)
         {
-            SetNewScrobble(status);
+            await SetNewScrobble(status, cancellationToken);
             SetStatus("New Scrobble: changed file");
             return;
         }
@@ -127,7 +127,7 @@ public class ScrobblerBackgroundService(
         {
             if (_currentScrobbleSaved)
             {
-                SetNewScrobble(status);
+                await SetNewScrobble(status, cancellationToken);
 
                 SetStatus("New Scrobble: moved back scrobbled file");
                 return;
@@ -155,8 +155,8 @@ public class ScrobblerBackgroundService(
             using var scope = scopeFactory.CreateScope();
             var scrobblesService = scope.ServiceProvider.GetRequiredService<IScrobblesService>();
 
-            _currentScrobble.Duration = (int)TotalDuration;
-            await scrobblesService.SaveScrobble(_currentScrobble, cancellationToken);
+            _currentScrobble.VideoDuration = (int)TotalDuration;
+            await scrobblesService.AddScrobbleAsync(_currentScrobble, cancellationToken);
             _currentScrobbleSaved = true;
 
             logger.LogInformation(
@@ -187,8 +187,10 @@ public class ScrobblerBackgroundService(
         _totalDurationQueue.Enqueue(newTotalDuration);
     }
 
-    private void SetNewScrobble(VlcStatus status)
+    private async Task SetNewScrobble(VlcStatus status, CancellationToken cancellationToken)
     {
+        await TrySaveCurrentScrobbleTime(cancellationToken);
+        
         logger.LogInformation(
             "Start scrobbling: {FileName}",
             status.Information.Category.Meta.FileName
@@ -206,13 +208,15 @@ public class ScrobblerBackgroundService(
             FileName = meta.FileName,
             Title = meta.Title,
             InRepeat = status.Repeat,
-            Duration = (int)TotalDuration,
+            VideoDuration = (int)TotalDuration,
             Date = settings.SaveDate ? DateTime.Now : null,
         };
     }
 
-    private void ResetCurrentScrobble()
+    private async Task ResetCurrentScrobble(CancellationToken cancellationToken)
     {
+        await TrySaveCurrentScrobbleTime(cancellationToken);
+        
         if (_currentScrobble is null)
         {
             return;
@@ -224,6 +228,21 @@ public class ScrobblerBackgroundService(
         _currentDuration = 0;
         _lastPosition = 0;
         _currentScrobbleSaved = false;
+    }
+
+    private async Task TrySaveCurrentScrobbleTime(CancellationToken cancellationToken)
+    {
+        if (_currentScrobble is null || !_currentScrobbleSaved)
+        {
+            return;
+        }
+        
+        using var scope = scopeFactory.CreateScope();
+        var scrobblesService = scope.ServiceProvider.GetRequiredService<IScrobblesService>();
+
+        // Math.Min to safeguard against VLC freezing
+        _currentScrobble.ScrobbleDuration =Math.Min(_currentDuration,TotalDuration);
+        await scrobblesService.UpdateScrobbleAsync(_currentScrobble,cancellationToken);
     }
 
     private void SetStatus(string msg, bool logInfo = true)

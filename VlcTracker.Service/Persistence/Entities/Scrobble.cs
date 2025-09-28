@@ -10,7 +10,9 @@ public class Scrobble
     /// <summary>
     /// In seconds
     /// </summary>
-    public double? Duration { get; set; }
+    public double? VideoDuration { get; set; }
+    
+    public double? ScrobbleDuration { get; set; }
 
     public required DateTime? Date { get; init; }
 }

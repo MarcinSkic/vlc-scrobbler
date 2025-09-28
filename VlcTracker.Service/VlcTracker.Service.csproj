@@ -4,7 +4,7 @@
         <TargetFramework>net9.0</TargetFramework>
         <Nullable>enable</Nullable>
         <ImplicitUsings>enable</ImplicitUsings>
-        <Version>1.0.0</Version>
+        <Version>0.1.0</Version>
         <UserSecretsId>dotnet-VlcTracker.Service-380592da-60c8-43a1-b6ed-c155c3979e38</UserSecretsId>
         <ApplicationIcon>Assets/logo.ico</ApplicationIcon>
     </PropertyGroup>

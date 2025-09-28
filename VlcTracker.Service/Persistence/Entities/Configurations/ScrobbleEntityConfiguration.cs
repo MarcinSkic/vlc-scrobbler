@@ -19,11 +19,13 @@ public class ScrobbleEntityConfiguration : IEntityTypeConfiguration<Scrobble>
         builder.Property(s => s.Title).HasMaxLength(500).IsRequired(false);
 
         builder.Property(s => s.FileName).HasMaxLength(500).IsRequired();
-
+        
+        builder.Property(s => s.VideoDuration).IsRequired(false);
+        
+        builder.Property(s => s.ScrobbleDuration).IsRequired(false);
+        
         builder.Property(s => s.Date).IsRequired();
         
-        builder.Property(s => s.Duration).IsRequired(false);
-
         builder.HasIndex(s => s.Title);
         builder.HasIndex(s => s.FileName);
     }
