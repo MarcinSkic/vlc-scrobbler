@@ -15,6 +15,6 @@ public class Scrobble
     public double? ScrobbleDuration { get; set; }
 
     public required DateTime? Date { get; init; }
-    
+
     public DateTime CreatedAt { get; private init; } = DateTime.UtcNow;
 }

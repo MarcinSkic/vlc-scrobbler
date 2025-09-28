@@ -17,16 +17,14 @@ namespace VlcTracker.Service.Migrations
                 table: "Scrobbles",
                 type: "TEXT",
                 nullable: false,
-                defaultValue: new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified));
+                defaultValue: new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
+            );
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropColumn(
-                name: "CreatedAt",
-                schema: "tracker",
-                table: "Scrobbles");
+            migrationBuilder.DropColumn(name: "CreatedAt", schema: "tracker", table: "Scrobbles");
         }
     }
 }

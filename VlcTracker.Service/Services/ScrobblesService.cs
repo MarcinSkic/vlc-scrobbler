@@ -41,10 +41,12 @@ public class ScrobblesService(TrackingContext dbContext) : IScrobblesService
     {
         return new TotalScrobblingTimeResponse
         {
-            TotalScrobbleDurationIncludingImported =
-                await dbContext.Scrobbles.SumAsync(scrobble => scrobble.ScrobbleDuration ?? scrobble.VideoDuration ?? 0),
-            TotalScrobbleDuration = await dbContext.Scrobbles.SumAsync(scrobble => scrobble.ScrobbleDuration ?? 0)
-
+            TotalScrobbleDurationIncludingImported = await dbContext.Scrobbles.SumAsync(scrobble =>
+                scrobble.ScrobbleDuration ?? scrobble.VideoDuration ?? 0
+            ),
+            TotalScrobbleDuration = await dbContext.Scrobbles.SumAsync(scrobble =>
+                scrobble.ScrobbleDuration ?? 0
+            ),
         };
     }
 
@@ -67,18 +69,22 @@ public class ScrobblesService(TrackingContext dbContext) : IScrobblesService
     {
         var records = csvStream
             .GetRecords<ImportedScrobblesDto>()
-            .SelectMany(importedScrobbles => Enumerable.Range(0,importedScrobbles.Count).Select(_ => new Scrobble
-            {
-                Id = Guid.NewGuid(),
-                FileName = importedScrobbles.FileName,
-                Title = importedScrobbles.Title,
-                InRepeat = false,
-                VideoDuration = importedScrobbles.VideoDuration,
-                ScrobbleDuration = null,
-                Date = importedScrobbles.Date
-            }))
+            .SelectMany(importedScrobbles =>
+                Enumerable
+                    .Range(0, importedScrobbles.Count)
+                    .Select(_ => new Scrobble
+                    {
+                        Id = Guid.NewGuid(),
+                        FileName = importedScrobbles.FileName,
+                        Title = importedScrobbles.Title,
+                        InRepeat = false,
+                        VideoDuration = importedScrobbles.VideoDuration,
+                        ScrobbleDuration = null,
+                        Date = importedScrobbles.Date,
+                    })
+            )
             .ToList();
-        
+
         dbContext.Scrobbles.AddRange(records);
         await dbContext.SaveChangesAsync(cancellationToken);
         return records.Count;

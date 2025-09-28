@@ -25,7 +25,7 @@ public class ScrobbleEntityConfiguration : IEntityTypeConfiguration<Scrobble>
         builder.Property(s => s.ScrobbleDuration).IsRequired(false);
 
         builder.Property(s => s.Date).IsRequired(false);
-        
+
         builder.Property(s => s.CreatedAt).IsRequired();
 
         builder.HasIndex(s => s.Title);

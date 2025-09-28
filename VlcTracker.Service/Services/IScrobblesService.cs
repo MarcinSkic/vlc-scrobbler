@@ -9,7 +9,7 @@ public interface IScrobblesService
     Task<IEnumerable<ScrobbleModel>> GetScrobbles();
 
     Task<IEnumerable<ScrobblesGroupedResponse>> GetScrobblesByFilename();
-    
+
     Task<TotalScrobblingTimeResponse> GetTotalScrobblingTime();
 
     Task AddScrobbleAsync(Scrobble scrobble, CancellationToken cancellationToken);
