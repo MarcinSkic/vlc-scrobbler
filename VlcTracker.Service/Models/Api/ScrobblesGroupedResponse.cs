@@ -1,6 +1,6 @@
 namespace VlcTracker.Service.Models.Api;
 
-public class ScrobblesGrouped
+public class ScrobblesGroupedResponse
 {
     public required string FileName { get; init; }
     public required double? Duration { get; init; }

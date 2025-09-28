@@ -22,6 +22,12 @@ public static class Router
             async (IScrobblesService scrobblesService) =>
                 Results.Ok(await scrobblesService.GetScrobblesByFilename())
         );
+        
+        app.MapGet(
+            "/scrobbles/total-time",
+            async (IScrobblesService scrobblesService) =>
+                Results.Ok(await scrobblesService.GetTotalScrobblingTime())
+        );
 
         app.MapPost(
             "/scrobbles/import/csv",

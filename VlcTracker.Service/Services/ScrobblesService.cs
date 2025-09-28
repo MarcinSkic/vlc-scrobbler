@@ -16,11 +16,11 @@ public class ScrobblesService(TrackingContext dbContext) : IScrobblesService
             .ToListAsync();
     }
 
-    public async Task<IEnumerable<ScrobblesGrouped>> GetScrobblesByFilename()
+    public async Task<IEnumerable<ScrobblesGroupedResponse>> GetScrobblesByFilename()
     {
         return await dbContext
             .Scrobbles.GroupBy(scrobble => scrobble.FileName)
-            .Select(grouping => new ScrobblesGrouped
+            .Select(grouping => new ScrobblesGroupedResponse
             {
                 FileName = grouping.Key,
                 Duration = grouping
@@ -35,6 +35,17 @@ public class ScrobblesService(TrackingContext dbContext) : IScrobblesService
             })
             .OrderByDescending(scrobble => scrobble.Count)
             .ToListAsync();
+    }
+
+    public async Task<TotalScrobblingTimeResponse> GetTotalScrobblingTime()
+    {
+        return new TotalScrobblingTimeResponse
+        {
+            TotalScrobbleDurationIncludingImported =
+                await dbContext.Scrobbles.SumAsync(scrobble => scrobble.ScrobbleDuration ?? scrobble.VideoDuration ?? 0),
+            TotalScrobbleDuration = await dbContext.Scrobbles.SumAsync(scrobble => scrobble.ScrobbleDuration ?? 0)
+
+        };
     }
 
     public async Task AddScrobbleAsync(Scrobble scrobble, CancellationToken cancellationToken)
