@@ -37,7 +37,10 @@ using (var scope = app.Services.CreateScope())
 }
 
 app.MapOpenApi();
-app.MapScalarApiReference("/api");
+app.MapScalarApiReference("/api", options =>
+{
+    options.Title = "VlcTracker API";
+});
 app.MapAppEndpoints();
 
 app.Run();

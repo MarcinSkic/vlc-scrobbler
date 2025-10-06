@@ -2,6 +2,7 @@ using System.Globalization;
 using CsvHelper;
 using CsvHelper.Configuration;
 using VlcTracker.Service.Models.Api;
+using VlcTracker.Service.Models.Api.Core;
 using VlcTracker.Service.Services;
 
 namespace VlcTracker.Service.Web;
@@ -14,20 +15,20 @@ public static class Router
 
         app.MapGet(
             "/scrobbles",
-            async (IScrobblesService scrobblesService) =>
-                Results.Ok(await scrobblesService.GetScrobbles())
+            async ([AsParameters] Filters filters,IScrobblesService scrobblesService) =>
+                Results.Ok(await scrobblesService.GetScrobbles(filters))
         ).Produces<IEnumerable<ScrobbleModel>>();
 
         app.MapGet(
             "/scrobbles/filenames",
-            async (IScrobblesService scrobblesService) =>
-                Results.Ok(await scrobblesService.GetScrobblesByFilename())
+            async ([AsParameters] Filters filters,IScrobblesService scrobblesService) =>
+                Results.Ok(await scrobblesService.GetScrobblesByFilename(filters))
         ).Produces<IEnumerable<ScrobblesGroupedResponse>>();
 
         app.MapGet(
             "/scrobbles/total-time",
-            async (IScrobblesService scrobblesService) =>
-                Results.Ok(await scrobblesService.GetTotalScrobblingTime())
+            async ([AsParameters] Filters filters,IScrobblesService scrobblesService) =>
+                Results.Ok(await scrobblesService.GetTotalScrobblingTime(filters))
         ).Produces<TotalScrobblingTimeResponse>();
 
         app.MapPost(
