@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Scalar.AspNetCore;
 using VlcTracker.Service;
 using VlcTracker.Service.Extensions;
 using VlcTracker.Service.Persistence;
@@ -20,7 +21,8 @@ builder
     })
     .AddScoped<IScrobblesService, ScrobblesService>()
     .AddSingleton<IStatusService, StatusService>()
-    .AddHostedService<ScrobblerBackgroundService>();
+    .AddHostedService<ScrobblerBackgroundService>()
+    .AddOpenApi();
 
 builder.ConfigureLogging(settings);
 
@@ -34,6 +36,8 @@ using (var scope = app.Services.CreateScope())
     await dbContext.Database.MigrateAsync();
 }
 
+app.MapOpenApi();
+app.MapScalarApiReference("/api");
 app.MapAppEndpoints();
 
 app.Run();

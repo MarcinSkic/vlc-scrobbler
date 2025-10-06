@@ -10,26 +10,20 @@
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="CsvHelper" Version="33.1.0" />
+    <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.9" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.9">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="9.0.9" />
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="9.0.9" />
+    <PackageReference Include="Scalar.AspNetCore" Version="2.8.10" />
   </ItemGroup>
   <Target Name="GenerateInstallerVars" AfterTargets="Build">
     <ItemGroup>
       <InstallerVarsFile Include="$(MSBuildProjectDirectory)\installer-vars.iss" />
     </ItemGroup>
-    <WriteLinesToFile
-      File="@(InstallerVarsFile)"
-      Lines="#define AppName &quot;$(ProductName)&quot;"
-      Overwrite="true"
-    />
-    <WriteLinesToFile
-      File="@(InstallerVarsFile)"
-      Lines="#define AppVersion &quot;$(Version)&quot;"
-      Overwrite="false"
-    />
+    <WriteLinesToFile File="@(InstallerVarsFile)" Lines="#define AppName &quot;$(ProductName)&quot;" Overwrite="true" />
+    <WriteLinesToFile File="@(InstallerVarsFile)" Lines="#define AppVersion &quot;$(Version)&quot;" Overwrite="false" />
   </Target>
 </Project>
